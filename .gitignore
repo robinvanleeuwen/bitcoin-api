@@ -1,0 +1,12 @@
+env
+*.pyc
+./log.txt
+*.DS_Store
+__pycache__
+migrations/
+web/
+venv/
+node_modules/
+.idea/
+.ipynb_checkpoints/
+
