@@ -1,15 +1,13 @@
 import krakenex
-import simplejson as json
 
-from flask import Blueprint, request
-from flask_cors import cross_origin
+from flask import Blueprint
 from decimal import Decimal
 
 from auth import LoginManager
 from db import db
 from db.models import Ohlc
-from errors import GenericApiError
 from log import log
+from setup import get_kraken_api
 
 account_bp = Blueprint("account_bp", __name__)
 
@@ -110,24 +108,6 @@ def api_balance():
 @login_manager.token_required
 def trades():
     return {"trades": []}
-
-
-@account_bp.route("/login", methods=["POST", "OPTIONS"])
-@cross_origin()
-def login() -> dict:
-    return login_manager.login()
-
-
-def get_kraken_api():
-    api = krakenex.API()
-    try:
-        api.load_key("/etc/kraken-api.key")
-    except FileNotFoundError as e:
-        log.error(f"Could not load keyfile: {e}")
-        return False
-
-    log.debug("Kraken API loaded successfully")
-    return api
 
 
 def correct_currency_in_dictionary(dictionary):

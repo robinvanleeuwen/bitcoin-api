@@ -16,8 +16,9 @@ import os
 import sys
 from time import sleep
 
+from flask import request, jsonify
 from flask_api import FlaskAPI
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 from config import app_config
 from log import log
@@ -40,12 +41,13 @@ def create_app() -> FlaskAPI:
     app.config.from_object(app_config[config_name])
     app.config['ENV'] = config_name
 
+
     return app
 
 
 app = create_app()
-app.config['CORS_HEADERS'] = 'Access-Control-Allow-Origin'
-CORS(app, resources={r"/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/login": {"origins": "*"}})
+
 
 if __name__ == "__main__":
     args = docopt(__doc__)
@@ -81,6 +83,14 @@ if __name__ == "__main__":
         db.init_app(app)
         from api.account import account_bp
         from api.orders import orders
+
+
+        @app.route("/login", methods=['GET', 'POST', 'OPTIONS'])
+        @cross_origin(allow_headers=['Content-Type'])
+        def login() -> dict:
+            log.debug(request)
+            log.debug("API login()")
+            return jsonify({"token": "bananarama"})
 
         app.register_blueprint(account_bp, url_prefix="/account")
         app.register_blueprint(orders, url_prefix="/orders")

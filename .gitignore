@@ -1,6 +1,5 @@
 env
 *.pyc
-./log.txt
 *.DS_Store
 __pycache__
 migrations/
@@ -9,4 +8,6 @@ venv/
 node_modules/
 .idea/
 .ipynb_checkpoints/
+log.txt
+images/
 

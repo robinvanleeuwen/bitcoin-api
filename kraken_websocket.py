@@ -108,6 +108,8 @@ def store2psql(data):
 
 def handle_ticker_data(data, **kwargs):
 
+    log.debug(data[1])
+
     record = Ticker()
 
     record.a_price = data[1]["a"][0]

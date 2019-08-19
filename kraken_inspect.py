@@ -59,20 +59,31 @@ def warn_active_trading(
     :return:
     """
 
+
+
     data = get_latest_ticker(interval)
-    if len(data) < 2:
-        log.debug("Tumbleweeds on tradingfloor...")
+
+    if len(data) == 0:
+        log.debug("{a:19s} |             |   0 trades | Tumbleweeds on tradingfloor... ".format(a=time.strftime ('%Y-%m-%d %H:%M:%S', time.localtime())))
+        return -1.00
+
+    if len(data) == 1:
+        log.debug("{a:19s} | {b:10f} |   1 trade  | Tumbleweeds on tradingfloor... ".format(
+            a=time.strftime ('%Y-%m-%d %H:%M:%S', time.localtime(data[0]['timestamp'])),
+            b=data[-1]['c_price'],
+            c=len(data)
+        ))
         return -1.00
 
     measured_diff = data[-1]['c_price'] - data[0]['c_price']
 
-    log.debug("{a:3d} records | diff {b:10f} | interval {c:3d} | {d:19s} | {e:9f} | {f:18f} |"
+    log.debug("{a:19s} | {b:10f} | {c:3d} trades | diff {d:10f} | interval:{e:3d} | {f:18f} |"
         .format(
-            a=len(data),
-            b=measured_diff,
-            c=interval,
-            d=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(data[0]['timestamp'])),
-            e=data[-1]['c_price'],
+            a=time.strftime ('%Y-%m-%d %H:%M:%S', time.localtime(data[0]['timestamp'])),
+            b=data[-1]['c_price'],
+            c=len(data),
+            d=measured_diff,
+            e=interval,
             f=data[-1]['timestamp']
         )
     )
