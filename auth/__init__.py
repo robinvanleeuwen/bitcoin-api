@@ -17,10 +17,11 @@ class LoginManager(object):
 
         @wraps(f)
         def wrapper(*args, **kwargs):
-
+            print(request.data)
             token = request.data.get('token', False)
             username = request.data.get("username", False)
-
+            log.debug(token)
+            log.debug(username)
             if not token or not username:
                 return {"error": "not authenticated!"}
 

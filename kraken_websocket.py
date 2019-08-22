@@ -62,6 +62,7 @@ def kraken_rest_api_to_psql(interval=1, pair="XXBTZEUR"):
                 db.session.commit()
 
             except Exception as e:
+                db.session.rollback()
                 log.warning(f"Failure inserting record: {e}")
         else:
             c += 1
@@ -108,8 +109,6 @@ def store2psql(data):
 
 def handle_ticker_data(data, **kwargs):
 
-    log.debug(data[1])
-
     record = Ticker()
 
     record.a_price = data[1]["a"][0]
@@ -147,6 +146,7 @@ def handle_ticker_data(data, **kwargs):
         print("⇩", end="")
         sys.stdout.flush()
     except Exception as e:
+        db.session.rollback()
         log.error(f"Could not insert ticker data: {str(e)}")
 
 
@@ -220,6 +220,7 @@ def handle_ohlc_data(data, **kwargs):
         db.session().commit()
 
     except Exception as e:
+        db.session.rollback()
         print(f"Failure adding/updating ohcl: {e}")
 
 

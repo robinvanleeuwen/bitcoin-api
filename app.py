@@ -1,5 +1,5 @@
 """
-Usage: app.py (-a | -o -i <integer> | -t | --inspect)
+Usage: app.py [-a]  [(-o -i <integer>)] [-t] | --inspect
 
 Dashboard API for crypto currency
 
@@ -21,8 +21,11 @@ from flask_api import FlaskAPI
 from flask_cors import CORS, cross_origin
 
 from config import app_config
+
 from log import log
 from docopt import docopt
+
+import threading
 
 config_name: str = os.getenv("APP_SETTINGS")
 
@@ -40,16 +43,14 @@ def create_app() -> FlaskAPI:
     app: FlaskAPI = FlaskAPI(__name__)
     app.config.from_object(app_config[config_name])
     app.config['ENV'] = config_name
-
-
     return app
 
 
 app = create_app()
-cors = CORS(app, resources={r"/login": {"origins": "*"}})
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 
-if __name__ == "__main__":
+def main():
     args = docopt(__doc__)
 
     interval: int = 1
@@ -72,11 +73,17 @@ if __name__ == "__main__":
                 sleep(2)
             sys.exit(0)
 
-        run_ohlc_websocket(interval=interval)
+        thread = threading.Thread(target=run_ohlc_websocket, args=(interval,))
+        thread.start()
 
     if args["-t"]:
+
         from kraken_websocket import run_ticker_websocket
-        run_ticker_websocket()
+
+        thread = threading.Thread(target=run_ticker_websocket)
+        log.info("Starting thread")
+        thread.start()
+        log.info("Waiting for end")
 
     if args["-a"]:
         from db import db
@@ -84,13 +91,19 @@ if __name__ == "__main__":
         from api.account import account_bp
         from api.orders import orders
 
-
         @app.route("/login", methods=['GET', 'POST', 'OPTIONS'])
         @cross_origin(allow_headers=['Content-Type'])
         def login() -> dict:
-            log.debug(request)
-            log.debug("API login()")
-            return jsonify({"token": "bananarama"})
+            from auth import LoginManager
+            login_manager = LoginManager()
+            return login_manager.login()
+
+            #  select t.token, u.name from tokens as t
+            #  join users as u on user_id = u.id
+            #  where u.name = 'banana'
+            #  order by timestamp desc
+            #  limit 1;
+            return jsonify({"token": "9b6e1d23-a656-4118-9037-ebf288536ad5"})
 
         app.register_blueprint(account_bp, url_prefix="/account")
         app.register_blueprint(orders, url_prefix="/orders")
@@ -102,3 +115,6 @@ if __name__ == "__main__":
 
     if not args["-a"] and not args["-t"] and not args["--inspect"]:
         print(__doc__)
+
+if __name__ == "__main__":
+    main()

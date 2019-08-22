@@ -54,15 +54,15 @@ def get_current_ticker_info(account: str = "kraken") -> dict:
         return {"error": "No valid account"}
 
 
-@account_bp.route("/balance", methods=["POST", "OPTIONS"])
+@account_bp.route("/balance", methods=["GET", "POST", "OPTIONS"])
 @login_manager.token_required
 def api_balance():
     """
     Get the total balance and the open balance available for trading.
     :return:
     """
-
     api = get_kraken_api()
+
     if not api:
         return {"error": "Could not load Kraken API, check log."}
 
