@@ -72,7 +72,11 @@ def kraken_rest_api_to_psql(interval=1, pair="XXBTZEUR"):
 
 
 def store2psql(data):
-
+    """
+    Store data to the porstgresql database
+    :param data: result from websocket
+    :return:
+    """
     if type(data) is list:
         handler: callable = getattr(
             sys.modules[__name__],

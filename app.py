@@ -81,9 +81,7 @@ def main():
         from kraken_websocket import run_ticker_websocket
 
         thread = threading.Thread(target=run_ticker_websocket)
-        log.info("Starting thread")
         thread.start()
-        log.info("Waiting for end")
 
     if args["-a"]:
         from db import db
