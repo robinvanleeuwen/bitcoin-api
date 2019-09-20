@@ -55,47 +55,37 @@ def main():
 
     args = docopt(__doc__)
 
-    # if args["-i"]:
-    #     else:
-    #         intervals = args["-i"].split(",")
+    if args["-i"]:
+        intervals = list()
+        for i in args["-i"].split(","):
+            try:
+                intervals.append(int(i))
+            except Exception as e:
+                log.error("Could not interpret intervals, use comma-seperated list.")
+                sys.exit(1)
 
-    intervals = list()
-    for i in args["-i"].split(","):
-        try:
-            intervals.append(int(i))
-        except Exception as e:
-            log.error("Could not interpret intervals, use comma-seperated list.")
-            sys.exit(1)
+            if int(i) not in [0, 1,5,15,30,60,240]:
+                log.error("Invalid ticker/OHLC interval use: 1, 5, 15, 30, 60 or 240.")
+                sys.exit(1)
 
-        if int(i) not in [0, 1,5,15,30,60,240]:
-            log.error("Invalid ticker/OHLC interval use: 1, 5, 15, 30, 60 or 240.")
-            sys.exit(1)
+        if args["-o"]:
+            from kraken_websocket import run_ohlc_websocket, kraken_rest_api_to_psql
 
-    if args["-o"]:
-        from kraken_websocket import run_ohlc_websocket, kraken_rest_api_to_psql
+            if intervals == 0:
+                log.info("Retrieving all intervals")
+                for i in [1,5,15,30,60,240]:
+                    kraken_rest_api_to_psql(interval=i)
+                    log.info("...")
+                    sys.stdout.flush()
+                    sleep(2)
+                sys.exit(0)
 
-        if intervals == 0:
-            log.info("Retrieving all intervals")
-            for i in [1,5,15,30,60,240]:
-                kraken_rest_api_to_psql(interval=i)
-                log.info("...")
-                sys.stdout.flush()
-                sleep(2)
-            sys.exit(0)
+        threads = list()
+        for i in intervals:
+            threads.append(threading.Thread(target=run_ohlc_websocket, args=(i,)))
 
-    threads = list()
-    for i in intervals:
-        threads.append(threading.Thread(target=run_ohlc_websocket, args=(i,)))
-
-    for t in threads:
-        t.start()
-
-
-
-        # thread1 = threading.Thread(target=run_ohlc_websocket, args=(5,))
-        # thread2 = threading.Thread(target=run_ohlc_websocket, args=(60,))
-        # thread1.start()
-        # thread2.start()
+        for t in threads:
+            t.start()
 
     if args["-a"]:
         from db import db
