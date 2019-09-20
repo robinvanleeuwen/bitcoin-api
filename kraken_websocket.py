@@ -99,14 +99,13 @@ def store2psql(data):
         log.info(f"Subscription Status = {data.get('status')}")
         if data.get("status") == "error":
             log.error(f"Error message      = {data.get('errorMessage')}")
-        print(data)
+
         log.info("------------------------------------------------------")
 
         subscriptions[data.get("channelID")] = {
             "meta": data.get("subscription"),
             "pair": data.get("pair"),
         }
-        print(subscriptions)
 
     if type(data) is dict and data.get("event") == "heartbeat":
         print("\u2665", end="")
