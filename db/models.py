@@ -54,6 +54,20 @@ class Ohlc(db.Model):
         Index("idx_interval_endtime", "interval", "begintime", unique=True),
     )
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def as_canvasjs_datapoints(self):
+        return {
+            "x": self.endtime * 1000,
+            "y": [
+                self.open,
+                self.high,
+                self.low,
+                self.close
+            ]
+        }
+
     id = Column(Integer, primary_key=True)
     pair = Column(CHAR(7))
     interval = Column(Integer())

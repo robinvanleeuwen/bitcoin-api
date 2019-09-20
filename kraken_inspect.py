@@ -19,7 +19,7 @@ def get_latest_ticker(interval=0):
 
 def run():
 
-    warn_active_interval = 20
+    warn_active_interval = 10
     warn_active_min_trades = 20
     warn_active_min_diff = D(25.0)
 
@@ -59,12 +59,10 @@ def warn_active_trading(
     :return:
     """
 
-
-
     data = get_latest_ticker(interval)
 
     if len(data) == 0:
-        log.debug("{a:19s} |             |   0 trades | Tumbleweeds on tradingfloor... ".format(a=time.strftime ('%Y-%m-%d %H:%M:%S', time.localtime())))
+        log.debug("{a:19s} |            |   0 trades | Tumbleweeds on tradingfloor... ".format(a=time.strftime ('%Y-%m-%d %H:%M:%S', time.localtime())))
         return -1.00
 
     if len(data) == 1:

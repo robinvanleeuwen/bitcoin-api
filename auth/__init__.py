@@ -39,7 +39,6 @@ class LoginManager(object):
         return wrapper
 
     def validate_token(self, token, username):
-
         record = db.session().query(Tokens).join(Users, Users.name == username).filter(
                 Tokens.token == token
         ).one_or_none()

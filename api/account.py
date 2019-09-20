@@ -8,6 +8,7 @@ from db import db
 from db.models import Ohlc
 from log import log
 from setup import get_kraken_api
+from portfolio import Portfolio
 
 account_bp = Blueprint("account_bp", __name__)
 
@@ -32,7 +33,7 @@ def get_current_ticker_info(account: str = "kraken") -> dict:
         log.debug(result)
         return {"account": account, "XXBTZEUR": result["c"][0]}
 
-        return result
+
 
     if account == "local":
         record = (
@@ -62,7 +63,7 @@ def api_balance():
     :return:
     """
     api = get_kraken_api()
-
+    print("BALANCE!")
     if not api:
         return {"error": "Could not load Kraken API, check log."}
 
@@ -72,8 +73,10 @@ def api_balance():
     balance["total"] = correct_currency_in_dictionary(balance["total"])
 
     log.debug("Getting open orders")
-    open_orders = api.query_private("OpenOrders")["result"]
+    open_orders = api.query_private("OpenOrders")
 
+    print(f"DEBUG: {open_orders}")
+    open_orders = open_orders["result"]
     # Make a copy of the total dict, so we can calculate
     # the remaining balance available for trading on this
     # copy.
@@ -102,6 +105,13 @@ def api_balance():
         "balance": balance,
         "error": ""
     }
+
+
+@account_bp.route("/portfolio", methods=["POST", "OPTIONS"])
+@login_manager.token_required
+def portfolio():
+    p = Portfolio()
+    return p.get_summary()
 
 
 @account_bp.route("/trades", methods=["POST", "OPTIONS"])

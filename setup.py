@@ -2,7 +2,6 @@ import krakenex
 
 from log import log
 
-
 def get_kraken_api():
     api = krakenex.API()
     try:

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from log import log
 from db import db
 from db.models import Ticker, Ohlc
+from portfolio import Portfolio
 
 subscriptions: dict = dict()
 
@@ -98,13 +99,14 @@ def store2psql(data):
         log.info(f"Subscription Status = {data.get('status')}")
         if data.get("status") == "error":
             log.error(f"Error message      = {data.get('errorMessage')}")
-
+        print(data)
         log.info("------------------------------------------------------")
 
         subscriptions[data.get("channelID")] = {
             "meta": data.get("subscription"),
             "pair": data.get("pair"),
         }
+        print(subscriptions)
 
     if type(data) is dict and data.get("event") == "heartbeat":
         print("\u2665", end="")
@@ -238,6 +240,7 @@ def run_ohlc_websocket(interval: int=0, pair: str= "XBT/EUR"):
 
     log.info(f"Setting up OHLC websocket")
     client = kraken_client.WssClient()
+
     client.subscribe_public(
         subscription={"name": "ohlc", "interval": interval}, pair=[pair], callback=store2psql
     )
@@ -250,13 +253,15 @@ def run_ohlc_websocket(interval: int=0, pair: str= "XBT/EUR"):
 
     client.start()
 
-def run_ticker_websocket(pair: str="XBT/EUR"):
+def run_ticker_websocket(portfolio: Portfolio):
 
     log.info(f"Setting up Ticker websocket")
 
+    print(portfolio.pairs)
+
     client = kraken_client.WssClient()
     client.subscribe_public(
-        subscription={"name": "ticker"}, pair=[pair], callback=store2psql
+        subscription={"name": "ticker"}, pair=portfolio.pairs, callback=store2psql
     )
 
     log.info("Starting Ticker websocket")

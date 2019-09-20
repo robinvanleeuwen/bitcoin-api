@@ -16,7 +16,7 @@ import os
 import sys
 from time import sleep
 
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 from flask_api import FlaskAPI
 from flask_cors import CORS, cross_origin
 
@@ -49,22 +49,32 @@ def create_app() -> FlaskAPI:
 app = create_app()
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 
-
 def main():
+
+    from portfolio import Portfolio
+
     args = docopt(__doc__)
 
-    interval: int = 1
-    if args["-i"]:
-        if int(args["-i"]) not in [0, 1,5,15,30,60,240]:
-            log.error("Invalid ticker/OHLC interval use: 1, 5, 15, 30, 60 or 240 (0=all).")
+    # if args["-i"]:
+    #     else:
+    #         intervals = args["-i"].split(",")
+
+    intervals = list()
+    for i in args["-i"].split(","):
+        try:
+            intervals.append(int(i))
+        except Exception as e:
+            log.error("Could not interpret intervals, use comma-seperated list.")
             sys.exit(1)
-        else:
-            interval = int(args["-i"])
+
+        if int(i) not in [0, 1,5,15,30,60,240]:
+            log.error("Invalid ticker/OHLC interval use: 1, 5, 15, 30, 60 or 240.")
+            sys.exit(1)
 
     if args["-o"]:
         from kraken_websocket import run_ohlc_websocket, kraken_rest_api_to_psql
 
-        if interval == 0:
+        if intervals == 0:
             log.info("Retrieving all intervals")
             for i in [1,5,15,30,60,240]:
                 kraken_rest_api_to_psql(interval=i)
@@ -73,21 +83,26 @@ def main():
                 sleep(2)
             sys.exit(0)
 
-        thread = threading.Thread(target=run_ohlc_websocket, args=(interval,))
-        thread.start()
+    threads = list()
+    for i in intervals:
+        threads.append(threading.Thread(target=run_ohlc_websocket, args=(i,)))
 
-    if args["-t"]:
+    for t in threads:
+        t.start()
 
-        from kraken_websocket import run_ticker_websocket
 
-        thread = threading.Thread(target=run_ticker_websocket)
-        thread.start()
+
+        # thread1 = threading.Thread(target=run_ohlc_websocket, args=(5,))
+        # thread2 = threading.Thread(target=run_ohlc_websocket, args=(60,))
+        # thread1.start()
+        # thread2.start()
 
     if args["-a"]:
         from db import db
         db.init_app(app)
         from api.account import account_bp
         from api.orders import orders
+        from api.ohlc import ohlc_bp
 
         @app.route("/login", methods=['GET', 'POST', 'OPTIONS'])
         @cross_origin(allow_headers=['Content-Type'])
@@ -105,7 +120,16 @@ def main():
 
         app.register_blueprint(account_bp, url_prefix="/account")
         app.register_blueprint(orders, url_prefix="/orders")
+        app.register_blueprint(ohlc_bp, url_prefix="/graph")
         app.run(debug=config_name != "production")
+
+    if args["-t"]:
+
+        from kraken_websocket import run_ticker_websocket
+        portfolio = Portfolio()
+
+        thread = threading.Thread(target=run_ticker_websocket, args=(portfolio,))
+        thread.start()
 
     if args["--inspect"]:
         from kraken_inspect import run
