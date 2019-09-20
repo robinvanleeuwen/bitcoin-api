@@ -125,7 +125,7 @@ def main():
         from kraken_inspect import run
         run()
 
-    if not args["-a"] and not args["-t"] and not args["--inspect"]:
+    if not args["-a"] and not args["-t"] and not args["--inspect"] and not args["-o"]:
         print(__doc__)
 
 if __name__ == "__main__":

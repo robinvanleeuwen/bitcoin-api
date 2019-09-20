@@ -255,9 +255,7 @@ def run_ohlc_websocket(interval: int=0, pair: str= "XBT/EUR"):
 
 def run_ticker_websocket(portfolio: Portfolio):
 
-    log.info(f"Setting up Ticker websocket")
-
-    print(portfolio.pairs)
+    log.info(f"Setting up Ticker websocket for {portfolio.pairs}")
 
     client = kraken_client.WssClient()
     client.subscribe_public(
