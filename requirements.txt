@@ -2,7 +2,7 @@ alembic==1.0.11
 appdirs==1.4.3
 asn1crypto==0.24.0
 attrs==18.2.0
-autobahn==19.1.1
+autobahn==20.12.3
 Automat==0.7.0
 backcall==0.1.0
 black==19.3b0
