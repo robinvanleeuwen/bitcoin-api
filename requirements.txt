@@ -55,7 +55,7 @@ mpl-finance==0.10.0
 nbconvert==5.5.0
 nbformat==4.4.0
 nose==1.3.7
-notebook==6.1.5
+notebook==6.4.1
 numexpr==2.6.9
 numpy==1.16.4
 orca==1.5.1
