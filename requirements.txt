@@ -49,7 +49,7 @@ krakenex==2.1.0
 Mako==1.0.13
 MarkupSafe==1.1.1
 matplotlib==3.1.1
-mistune==0.8.4
+mistune==2.0.3
 mock==3.0.5
 mpl-finance==0.10.0
 nbconvert==5.5.0
